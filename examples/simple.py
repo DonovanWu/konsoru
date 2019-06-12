@@ -40,6 +40,8 @@ optional arguments:
 1
 > set a 5
 > env
+ans = 1
+pi = 3.141592653589793
 a = 5
 > sub a 1.5
 3.5
@@ -117,7 +119,7 @@ def set_var(name, value):
     if re.match(r'^[a-zA-Z_$][a-zA-Z_$0-9]*$', name):
         env[name] = _parse(value)
     else:
-        raise ValueError('"%s" does not follow variable name rule!' % s)
+        raise ValueError('"%s" does not follow variable name rule!' % name)
 
 
 @description('Show all variables.')
