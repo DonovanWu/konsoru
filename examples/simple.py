@@ -1,8 +1,8 @@
 """
 A simple calculator example to demonstrate the basics of konsoru framework.
 
-How to use this script
-------------------------
+Demo
+----------------
 bash-3.2$ python3 examples/simple.py
 Type 'help' to see help message.
 Type 'quit' or 'exit' to exit the program.

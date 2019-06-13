@@ -305,6 +305,7 @@ class CLI:
             Type of exception to catch.
         behavior : function or None
             A function that takes a single argument, the error object.
+            If None, does nothing.
         """
 
         self._exception_behaviors[exception] = behavior

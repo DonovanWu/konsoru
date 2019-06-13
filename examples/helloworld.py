@@ -1,8 +1,8 @@
 """
 A bare minimum example.
 
-How to use this script
-------------------------
+Demo
+----------------
 bash-3.2$ python3 examples/helloworld.py
 Type 'help' to see help message.
 Type 'quit' or 'exit' to exit the program.
