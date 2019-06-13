@@ -14,6 +14,11 @@ Demo
 There won't be a demo this time around...
 Explore how to use the script by yourself! Or just read the source code.
 That's why it is called "advanced.py". It is meant for advanced users!
+
+Suggestions
+----------------
+Turn on --debug and try to break it, and see what's different.
+For example, set the timeout to be really low and then lookup via network.
 """
 
 import os, json, argparse, random
@@ -22,6 +27,7 @@ import requests    # use pip to install this if you don't have it
 from konsoru import CLI
 from konsoru import config
 from konsoru.decorators import description, parameter
+from konsoru.utils import ask_yes_or_no
 
 DEFAULT_OUI_FILES = [
     '/usr/share/arp-scan/ieee-oui.txt',
@@ -59,27 +65,41 @@ class KindlyRemind(Exception):
 
 class MacAddress:
     def __init__(self, mac_addr):
+        # polymorphism
+        if isinstance(mac_addr, int):
+            mac_addr = '%012x' % mac_addr
+        elif isinstance(mac_addr, MacAddress):
+            mac_addr = str(mac_addr)
+
         if ':' in mac_addr:
             self.delimiter = ':'
         elif '-' in mac_addr:
             self.delimiter = '-'
         else:
             self.delimiter = ''
+
         self.hex = mac_addr.lower().replace(self.delimiter, '')
+
         if len(self.hex) != 12 or not all(ch in '0123456789abcdef' for ch in self.hex):
             raise ValueError('Illegal MAC address: ' + mac_addr)
+
         if self.hex.startswith('0050c2') or self.hex.startswith('40d855'):
             self.prefix = self.hex[:9]
             self.category = 'iab'
         else:
             self.prefix = self.hex[:6]
             self.category = 'oui'
+
         self.numeric = int(self.hex, 16)
 
     def __str__(self):
         return self.delimiter.join(self.hex[i:i+2] for i in range(0, len(self.hex), 2))
 
-    # TODO: add a class method to CLI to show off??
+    def print_info(self):
+        print('MAC address: ' + self.__str__())
+        print('Prefix: ' + self.prefix)
+        print('Decimal: ' + str(self.numeric))
+        print('Belongs to: ' + self.category)
 
 
 @description('Load MAC-Vendor mapping data from OUI or IAB file.')
@@ -179,7 +199,7 @@ def show_settings():
 
 
 def lookup(mac_addr):
-    global new_mappings
+    global new_mappings, prefix_mapping
 
     mac_addr = MacAddress(mac_addr)
     prefix = mac_addr.prefix
@@ -215,9 +235,33 @@ def lookup(mac_addr):
         raise KindlyRemind('Lookup server returned HTTP code: %d' % resp.status_code)
 
 
-# TODO: think of a way to resolve saving in two separate files
-def save(filename=None):
-    raise NotImplementedError('Sorry!')
+@description('Update the original OUI and IAB files.')
+def update():
+    global new_mappings
+    if not ask_yes_or_no("This is going to overwrite the OUI and IAB files you're using. Are you sure?"):
+        raise KindlyRemind('Operation canceled by user!')
+
+    if ouifile is None:
+        fname_oui = './ieee-oui.txt'
+        print("You're not using an OUI file... Saving to current directory...")
+    else:
+        fname_oui = ouifile
+    if iabfile is None:
+        fname_iab = './ieee-iab.txt'
+        print("You're not using an IAB file... Saving to current directory...")
+    else:
+        fname_iab = iabfile
+
+    with open(fname_oui, 'a') as foui, open(fname_iab, 'a') as fiab:
+        for prefix in new_mappings:
+            vendor = prefix_mapping[prefix]
+            if len(prefix) == 6:
+                foui.write('%s\t%s\n' % (prefix.upper(), vendor))
+            elif len(prefix) == 9:
+                fiab.write('%s\t%s\n' % (prefix.upper(), vendor))
+
+    new_mappings.clear()
+    print('Done!')
 
 
 parser = argparse.ArgumentParser()
@@ -230,8 +274,7 @@ debug = args.debug
 ouifile = args.ouifile
 iabfile = args.iabfile
 
-# prefix -> vendor
-prefix_mapping = {}
+prefix_mapping = {}  # prefix -> vendor
 new_mappings = set()
 
 # requests parameters
@@ -239,6 +282,7 @@ proxies = None
 headers = None
 timeout = None
 
+# load MAC-Vendor mapping
 if config.system != 'windows':
     if ouifile is None:
         for fname in DEFAULT_OUI_FILES:
@@ -250,22 +294,26 @@ if config.system != 'windows':
             if os.path.isfile(fname):
                 iabfile = fname
                 break
-
 if ouifile is not None:
     load_mapping(ouifile)
 if iabfile is not None:
     load_mapping(iabfile)
 
+# memory
+random_mac = MacAddress(random.randint(0, 2**48 - 1))
+random_mac.delimiter = ':'
+
 config.settings['shell']['allowed_commands']['unix'].append('arp-scan')  # you need to have it to use it...
 cli = CLI(prompt='$ ', goodbye_msg='See you later, alligator!',
           enable_traceback=debug, enable_shell=True, enable_eof_exit_confirmation=True)
 cli.add_function(lookup)
-cli.add_function(save)
+cli.add_function(update)
 cli.add_function(load_mapping, name='load')
 cli.add_function(set_proxy, name='set proxy')
 cli.add_function(set_agent, name='set agent')  # just for fun
 cli.add_function(set_timeout, name='set timeout')
 cli.add_function(show_learned, name='show learned')
 cli.add_function(show_settings, name='show settings')
+cli.add_function(random_mac.print_info, name='_(:3JL)_')
 cli.add_exception_behavior(KindlyRemind, lambda e: print(str(e)))
 cli.loop()
