@@ -5,7 +5,6 @@ if config.system != 'windows':
     import termios, copy, readline
 
     class TerminalMode:
-        NORMAL = 'normal'
         NONECHO = 'nonecho'
         # NONCANONICAL = 'noncanonical'
 
@@ -15,9 +14,7 @@ if config.system != 'windows':
             self._fd = None
 
         def __enter__(self):
-            if self._mode == TerminalMode.NORMAL:
-                return
-            elif self._mode == TerminalMode.NONECHO:
+            if self._mode == TerminalMode.NONECHO:
                 self._fd = 0
                 attr = termios.tcgetattr(self._fd)
                 self._saved_attr = copy.deepcopy(attr)
@@ -27,10 +24,28 @@ if config.system != 'windows':
         def __exit__(self, type, value, traceback):
             # restore previous terminal settings
             if self._saved_attr is not None:
-                termios.tcsetattr(0, termios.TCSANOW, self._saved_attr)
+                termios.tcsetattr(self._fd, termios.TCSANOW, self._saved_attr)
 
 
     def enter_password(prompt='Password: ', hash_method=None):
+        """
+        Changes terminal to non-echo mode and asks user password.
+
+        Parameters
+        ----------
+        prompt : str
+            A prompt message to show.
+        hash_method : str or None
+            If specified, hash the password and return the hash. Otherwise
+            just return plain password for comparison. Supported methods
+            are: 'md5', 'sha1', 'sha224', 'sha256', 'sha384'.
+
+        Returns
+        -------
+        password : str
+            Plaintext or hashed user input.
+        """
+
         import hashlib
         hashmap = {
             'md5': hashlib.md5,
@@ -53,7 +68,7 @@ if config.system != 'windows':
                 raise ValueError("Parameter 'hash_method' must be a NoneType or str!")
             del user_input
             print()
-            return ret
+        return ret
 
 
 def ask_user_input(prompt=''):

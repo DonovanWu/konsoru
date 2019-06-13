@@ -196,8 +196,9 @@ class CLI:
     A simple CLI framework that comes with 3 default commands:
         help, exit, quit
     Use add_function() to add a function as a command in the CLI.
-    Function parameters are automatically converted to command arguments by
-    the following rules:
+    If not explicitly specified, function name is used as the command name.
+    Then, function parameters are automatically converted to command arguments
+    by the following rules:
         1. Parameters with no default value are added as positional arguments
         2. Parameters with True or False default value are added as [--flag]
         3. Parameters with None as default value are added as optional
@@ -212,9 +213,6 @@ class CLI:
         7. **kwargs parameters cannot be added and will raise an error
         8. Parameters with "weird" default value types cannot be added and
            will raise an error
-    Function docstring is automatically added as description of the command
-    in the command's help message.
-    If not explicitly specified, function name is used as the command name.
     """
 
     def __init__(self, prompt='> ', startup_msg=None, goodbye_msg=None,
@@ -347,6 +345,15 @@ class CLI:
         return sorted(self._command_options)
 
     def execute(self, user_input):
+        """
+        Executes a raw command string within the CLI console.
+
+        Parameters
+        ----------
+        user_input : str
+            The command string.
+        """
+
         cmd, argstr = _shift(user_input)
         if not cmd:  # empty input
             return
