@@ -1,4 +1,4 @@
-import os, re, sys
+import os, re, sys, glob
 import argparse, shlex, inspect, atexit
 import traceback, subprocess    # could potentially put them inside functions to hide them
 from collections import UserDict
@@ -104,9 +104,25 @@ class _Command:
 
     def run(self, argstr=''):
         try:
-            args = self.parser.parse_args(shlex.split(argstr))
+            args = shlex.split(argstr)
+            if config.settings['rules']['expand_asterisk']:
+                arglist = []
+                for arg in args:
+                    if not arg.startswith('-') and not re.search(r'\s', arg) and '*' in arg:
+                        # regard as filename pattern and expand this
+                        filenames = glob.glob(arg)
+                        if len(filenames) == 0:
+                            filenames = ['']
+                        arglist += filenames
+                    else:
+                        # regard as regular argument
+                        arglist.append(arg)
+                args = arglist
+                del arglist
+            args = self.parser.parse_args(args)
         except SystemExit:
             return None
+
         positionals = []
         kwargs = args.__dict__
         if len(self._positional_args) > 0:
@@ -119,6 +135,7 @@ class _Command:
             else:
                 positionals.append(kwargs[name])
             del kwargs[name]
+
         return self._func(*positionals, **kwargs)
 
     @property

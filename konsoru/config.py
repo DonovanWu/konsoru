@@ -34,5 +34,6 @@ settings = {
     },
     'rules': {
         'case_insensitive': False,
+        'expand_asterisk': True,
     },
 }
