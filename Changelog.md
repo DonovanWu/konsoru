@@ -9,6 +9,10 @@ New Features:
 2. Added "tee" and "sed" to default allowed unix commands.
 3. Added a hidden CLI class method "list_shell_commands".
 
+Bug Fixes:
+
+1. Fixed a bug with appendable argument that happens when no argument is provided.
+
 ## v0.0.2
 
 Improvements:

@@ -103,7 +103,7 @@ class _Command:
                     self._positional_args.append(name)
                 elif isinstance(param.default, (tuple, list)):
                     kwargs = _extract_kwargs(func, name, exclude_list=['action'])
-                    self.parser.add_argument(dest, action='append', **kwargs)
+                    self.parser.add_argument(dest, action='append', default=[], **kwargs)
                 elif isinstance(param.default, (float, int, str)):
                     kwargs = _extract_kwargs(func, name, exclude_list=['action', 'required', 'default'])
                     self.parser.add_argument(dest, action='store', type=type(param.default),
