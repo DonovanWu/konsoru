@@ -36,6 +36,17 @@ def _extract_kwargs(func, param_name, exclude_list=()):
     return kwargs
 
 
+def _print_block(list_of_str, min_cell_width=10, max_cell_width=20, block_width=60, indent=0):
+    longest = max(map(len, list_of_str))
+    cell_width = max(min_cell_width, min(max_cell_width, longest + 2))
+    cell_width = int(cell_width)
+    n_groupby = block_width // cell_width
+
+    for i in range(0, len(list_of_str), n_groupby):
+        group = list_of_str[i:i + n_groupby]
+        print(' ' * indent + '%-{}s'.format(cell_width) * len(group) % tuple(group))
+
+
 # ------------------------------------------------
 # primary components
 # ------------------------------------------------
@@ -248,11 +259,12 @@ class CLI:
         self._enable_traceback = enable_traceback
         self._enable_eof_exit_confirmation = enable_eof_exit_confirmation
         self._enable_non_tty_echo = enable_non_tty_echo
+        self._enable_shell = enable_shell
 
         self._shell_commands = []
         self._system = config.system if config.system in config.settings['shell']['allowed_commands'] else \
             config.settings['shell']['default_sys']
-        if enable_shell:
+        if self._enable_shell:
             self._shell_commands = config.settings['shell']['allowed_commands'][self._system]
 
         if enable_tab_completion:
@@ -329,15 +341,9 @@ class CLI:
         if command_name is None:
             # print help message for CLI
             commands = sorted(self._command_options)
-            longest = max(map(len, commands))
-            cell_width = max(10, min(20, longest + 2))
-            cell_width = int(cell_width)
-            n_groupby = 60 // cell_width  # max table width = 60 + 4 = 64
 
             print('Available commands:')
-            for i in range(0, len(commands), n_groupby):
-                group = commands[i:i + n_groupby]
-                print('    ' + '%-{}s'.format(cell_width) * len(group) % tuple(group))
+            _print_block(commands, block_width=60, indent=4)
             print('See help for a specific command by specifying the command name.')
             print('Help message for multi-layered command can still be seen by using '
                   'quotation marks around them.')
@@ -444,6 +450,11 @@ class CLI:
                 else:
                     print('[%s] %s' % (type(e).__name__, str(e)), file=sys.stderr)
                 continue
+
+    def list_shell_commands(self):
+        if self._enable_shell:
+            print('Available shell commands:')
+            _print_block(sorted(self._shell_commands), block_width=60, indent=4)
 
     # tries to hint user of top-level command and subcommand options, falls back to filesystem
     def _completer(self, text, state):

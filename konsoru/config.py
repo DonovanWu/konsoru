@@ -12,7 +12,8 @@ settings = {
             'windows': ['echo', 'dir', 'cls', 'find', 'mkdir', 'del', 'rmdir', 'copy',
                         'rename', 'type', 'move', 'ipconfig', 'ping', 'whoami'],
             'unix': ['pwd', 'echo', 'ls', 'clear', 'cat', 'grep', 'find', 'mkdir',
-                     'rm', 'rmdir', 'cp', 'mv', 'ifconfig', 'ping', 'seq', 'whoami', 'id'],
+                     'rm', 'rmdir', 'cp', 'mv', 'ifconfig', 'ping', 'seq', 'whoami',
+                     'id', 'tee', 'sed'],
         },
         'pipe_stdout': {
             'windows': ['echo', 'find', 'type', 'whoami'],
