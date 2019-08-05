@@ -15,7 +15,7 @@ if config.system != 'windows':
 # ------------------------------------------------
 
 def _shift(s, delim=None, trim=True):
-    args = s.split(sep=delim, maxsplit=1)
+    args = s.strip().split(sep=delim, maxsplit=1)
     if len(args) == 0:
         first, rest = '', ''
     elif len(args) == 1:
@@ -387,7 +387,7 @@ class CLI:
             # sanitize check input and disallow command that are not in whitelist
             if '$(' in user_input or '`' in user_input:
                 raise exceptions.NonCriticalCLIException('Shell command substitution is disallowed!')
-            for subcmd in user_input.split('|'):
+            for subcmd in re.split(r'\||&&', user_input):
                 cmd, argstr = _shift(subcmd)
                 if cmd != '' and cmd not in self._shell_commands:
                     raise exceptions.NonCriticalCLIException('Disallowed shell command: %s' % cmd)
