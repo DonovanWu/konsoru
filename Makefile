@@ -6,5 +6,8 @@ build: clean
 upload: build
 	twine upload dist/*
 
+install: build
+	python3 setup.py install
+
 clean:
 	rm -rf build/ dist/ *.egg-info/

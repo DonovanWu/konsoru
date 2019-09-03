@@ -199,7 +199,7 @@ class _CompositeCommand(UserDict):
             cmd = self.data[cmd]
             return cmd.run(argstr)
         else:
-            print('Unknown option: %s' % cmd)
+            print('Unknown subcommand: %s' % cmd)
             print(self.help)
 
     @property
@@ -208,12 +208,12 @@ class _CompositeCommand(UserDict):
 
     @property
     def usage(self):
-        return 'usage: %s [option]\n' % self._name
+        return 'usage: %s [subcommand]\n' % self._name
 
     @property
     def help(self):
         help_msg = self.usage
-        help_msg += 'available options:\n'
+        help_msg += 'available subcommands:\n'
         for cmd in sorted(self.data):
             help_msg += '    %s\n' % cmd
         return help_msg
@@ -355,7 +355,7 @@ class CLI:
             while subname:
                 name, subname = _shift(subname)
                 if name not in dictionary:
-                    print('Unknown option: %s' % command_name)
+                    print('Unknown command: %s' % command_name)
                     break
                 else:
                     cmd = dictionary[name]
@@ -450,6 +450,20 @@ class CLI:
                 else:
                     print('[%s] %s' % (type(e).__name__, str(e)), file=sys.stderr)
                 continue
+
+    def run(self):
+        """
+        Run as main program, execute the given subcommand once and exit.
+        """
+
+        parser = argparse.ArgumentParser()
+        parser.add_argument('subcommand', help="Available options: %s" % ', '.join(self._command_options.keys()))
+        args, unknown = parser.parse_known_args()
+
+        subcommand = args.subcommand
+        cmd_args = ' '.join(unknown)
+
+        self.execute('%s %s' % (subcommand, cmd_args))
 
     def list_shell_commands(self):
         if self._enable_shell:
