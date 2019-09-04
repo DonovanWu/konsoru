@@ -1,6 +1,16 @@
 Changelog
 =========
 
+## v0.0.5
+
+New Features:
+
+1. Added an option to add main function to "run" when no subcommand is given.
+
+Improvements:
+
+1. Now default commands (help, quit, exit) are no longer added in "run" mode.
+
 ## v0.0.4
 
 New Features:
