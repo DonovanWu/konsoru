@@ -401,6 +401,10 @@ class CLI:
             raise exceptions.NonCriticalCLIException('Unknown command: %s' % cmd)
 
     def loop(self):
+        """
+        Main loop of the console.
+        """
+
         # add default commands
         help_commands = config.settings['default_commands']['help']
         exit_commands = config.settings['default_commands']['exit']
@@ -454,12 +458,14 @@ class CLI:
 
     def run(self, main=None):
         """
-        Run as main program, execute the given subcommand once and exit.
+        Run as main program instead of looping, execute the given subcommand
+        once and exit.
 
         Parameters
         ----------
         main : function or None
-            Main function. If set, will execute the main function if no subcommand is given.
+            Main function. If set, will execute the main function if no
+            subcommand is given.
         """
 
         subcmd_helpstr = ', '.join(self._command_options.keys())
