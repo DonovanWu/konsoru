@@ -1,6 +1,12 @@
 Changelog
 =========
 
+## v0.0.4
+
+New Features:
+
+1. Added function "run" to CLI class to run command once and exit (more traditional CLI framework capability).
+
 ## v0.0.3
 
 New Features:

@@ -275,17 +275,6 @@ class CLI:
                 print('[WARNING] Since readline module cannot work on Windows, '
                       'tab completion has no effect!', file=sys.stderr)
 
-        help_commands = config.settings['default_commands']['help']
-        exit_commands = config.settings['default_commands']['exit']
-        if isinstance(help_commands, str):
-            help_commands = [help_commands]
-        if isinstance(exit_commands, str):
-            exit_commands = [exit_commands]
-        for name in help_commands:
-            self.add_function(self.print_help, name=name)
-        for name in exit_commands:
-            self.add_function(CLI.quit, name=name)
-
     def add_function(self, func, name=None):
         """
         Adds a function as command directly.
@@ -412,6 +401,18 @@ class CLI:
             raise exceptions.NonCriticalCLIException('Unknown command: %s' % cmd)
 
     def loop(self):
+        # add default commands
+        help_commands = config.settings['default_commands']['help']
+        exit_commands = config.settings['default_commands']['exit']
+        if isinstance(help_commands, str):
+            help_commands = [help_commands]
+        if isinstance(exit_commands, str):
+            exit_commands = [exit_commands]
+        for name in help_commands:
+            self.add_function(self.print_help, name=name)
+        for name in exit_commands:
+            self.add_function(CLI.quit, name=name)
+
         if self._startup_msg != '':
             print(self._startup_msg)
         while True:
@@ -451,19 +452,36 @@ class CLI:
                     print('[%s] %s' % (type(e).__name__, str(e)), file=sys.stderr)
                 continue
 
-    def run(self):
+    def run(self, main=None):
         """
         Run as main program, execute the given subcommand once and exit.
+
+        Parameters
+        ----------
+        main : str or None
+            Main function. If set, will execute the main function if no subcommand is given.
         """
 
-        parser = argparse.ArgumentParser()
-        parser.add_argument('subcommand', help="Available options: %s" % ', '.join(self._command_options.keys()))
+        subcmd_helpstr = ', '.join(self._command_options.keys())
+        if main is None:
+            parser = argparse.ArgumentParser()
+            parser.add_argument('subcommand', help="Available options: %s" % subcmd_helpstr)
+        else:
+            parser = argparse.ArgumentParser(add_help=False)
+            parser.add_argument('subcommand', nargs='?', default=None)
         args, unknown = parser.parse_known_args()
 
         subcommand = args.subcommand
         cmd_args = ' '.join(unknown)
 
-        self.execute('%s %s' % (subcommand, cmd_args))
+        if subcommand is None and main is not None:
+            description = getattr(main, 'description', '')
+            description = description + '\nAvailable subcommands: ' + subcmd_helpstr
+            main.description = description.strip()
+            maincmd = _Command(main, name=sys.argv[0])
+            maincmd.run(cmd_args)
+        else:
+            self.execute('%s %s' % (subcommand, cmd_args))
 
     def list_shell_commands(self):
         if self._enable_shell:
