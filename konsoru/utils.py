@@ -27,53 +27,41 @@ if config.system != 'windows':
                 termios.tcsetattr(self._fd, termios.TCSANOW, self._saved_attr)
 
 
-    def enter_password(prompt='Password: ', hash_method=None):
-        """
-        Changes terminal to non-echo mode and asks user password.
+def enter_password(prompt='Password: ', hash_method=None):
+    """
+    Turns off echo and asks user password.
 
-        Parameters
-        ----------
-        prompt : str
-            A prompt message to show.
-        hash_method : str or None
-            If specified, hash the password and return the hash. Otherwise
-            just return plain password for comparison. Supported methods
-            are: 'md5', 'sha1', 'sha224', 'sha256', 'sha384'.
+    Parameters
+    ----------
+    prompt : str
+        A prompt message to show.
+    hash_method : str or None
+        If specified, hash the password and return the hash. Otherwise
+        just return plain password. Supported methods are listed in the
+        "algorithms_guaranteed" variable in hashlib module.
 
-        Returns
-        -------
-        password : str
-            Plaintext or hashed user input.
-        """
+    Returns
+    -------
+    password : str
+        Plaintext or hashed user input.
+    """
 
-        import hashlib
-        hashmap = {
-            'md5': hashlib.md5,
-            'sha1': hashlib.sha1,
-            'sha224': hashlib.sha224,
-            'sha256': hashlib.sha256,
-            'sha384': hashlib.sha384,
-        }
-        with TerminalMode(mode=TerminalMode.NONECHO):
-            user_input = ask_user_input(prompt)
-            if isinstance(hash_method, str):
-                if hash_method not in hashmap:
-                    raise ValueError('Unsupported hash method: %s' % hash_method)
-                hash_method = hashmap[hash_method]
-                hashobj = hash_method(user_input.encode())
-                ret = hashobj.hexdigest()
-            elif hash_method is None:
-                ret = user_input
-            else:
-                raise ValueError("Parameter 'hash_method' must be a NoneType or str!")
-            del user_input
-            print()
-        return ret
+    import hashlib, getpass
+    password = getpass.getpass(prompt=prompt)
+    if isinstance(hash_method, str):
+        if hash_method not in hashlib.algorithms_guaranteed:
+            raise ValueError('Unsupported hash method: %s' % hash_method)
+        hash_method = getattr(hashlib, hash_method)
+        hashobj = hash_method(password.encode())
+        password = hashobj.hexdigest()
+    elif hash_method is not None:
+        raise ValueError("Parameter 'hash_method' must be a NoneType or str!")
+    return password
 
 
 def ask_user_input(prompt=''):
     """
-    Ask user input without being put into readline history.
+    Ask user input (without being put into readline history).
 
     Parameters
     ----------

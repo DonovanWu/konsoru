@@ -458,7 +458,7 @@ class CLI:
 
         Parameters
         ----------
-        main : str or None
+        main : function or None
             Main function. If set, will execute the main function if no subcommand is given.
         """
 
