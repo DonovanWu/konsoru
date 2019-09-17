@@ -13,7 +13,7 @@ settings = {
                         'rename', 'type', 'move', 'ipconfig', 'ping', 'whoami'],
             'unix': ['pwd', 'echo', 'ls', 'clear', 'cat', 'grep', 'find', 'mkdir',
                      'rm', 'rmdir', 'cp', 'mv', 'ifconfig', 'ping', 'seq', 'whoami',
-                     'id', 'tee', 'sed'],
+                     'id', 'sed', 'df'],
         },
         'pipe_stdout': {
             'windows': ['echo', 'find', 'type', 'whoami'],

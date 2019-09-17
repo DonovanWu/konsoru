@@ -271,6 +271,9 @@ class CLI:
             if config.system != 'windows':
                 readline.parse_and_bind("tab: complete")
                 readline.set_completer(self._completer)
+            elif sys.platform == 'darwin' and 'libedit' in readline.__doc__:
+                readline.parse_and_bind("bind ^I rl_complete")
+                readline.set_completer(self._completer)
             else:
                 print('[WARNING] Since readline module cannot work on Windows, '
                       'tab completion has no effect!', file=sys.stderr)
@@ -376,12 +379,12 @@ class CLI:
             # sanitize check input and disallow command that are not in whitelist
             if '$(' in user_input or '`' in user_input:
                 raise exceptions.NonCriticalCLIException('Shell command substitution is disallowed!')
-            for subcmd in re.split(r'\||&&', user_input):
+            if '|' in user_input or '&' in user_input:
+                raise exceptions.NonCriticalCLIException('Disallowed characters in shell command arguments!')
+            for subcmd in re.split(r'\||&&', user_input):    # temporarily keeping the old way
                 cmd, argstr = _shift(subcmd)
                 if cmd != '' and cmd not in self._shell_commands:
                     raise exceptions.NonCriticalCLIException('Disallowed shell command: %s' % cmd)
-            if '|' in user_input:
-                raise exceptions.NonCriticalCLIException('Sorry, piping is disallowed!')
 
             # execute command and redirect output to python's stdout and stderr according to config
             stdout = subprocess.PIPE if cmd in config.settings['shell']['pipe_stdout'][self._system] else None
