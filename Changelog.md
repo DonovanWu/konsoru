@@ -1,10 +1,15 @@
 Changelog
 =========
 
+## v0.0.7
+
+Bug Fixes:
+1. Fixed a tab completion bug on Mac.
+
 ## v0.0.6
 
 New Features:
-1. Added one exception for developers to user.
+1. Added one exception for developers to use.
 
 Improvements:
 1. Corrected some mistakes in docstrings.
