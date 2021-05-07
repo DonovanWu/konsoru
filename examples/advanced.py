@@ -22,7 +22,8 @@ For example, set the timeout to be really low and then lookup via network.
 """
 
 import os, json, argparse, random
-import requests    # use pip to install this if you don't have it
+import requests
+from urllib.parse import urlparse
 
 from konsoru import CLI
 from konsoru import config
@@ -124,12 +125,9 @@ def set_proxy(proxy):
     global proxies
 
     # lazily check if proxy url is legal
-    components = proxy.split('://')
-    if len(components) != 2:
-        raise KindlyRemind('You fxxked up proxy URL.')
-    scheme, path = components
+    o = urlparse(proxy)
     allowed_schemes = ['http', 'https', 'socks4', 'socks5', 'socks5h']
-    if scheme not in allowed_schemes:
+    if o.scheme not in allowed_schemes:
         raise KindlyRemind('Available schemes: %s' % ', '.join(allowed_schemes))
 
     proxies = {

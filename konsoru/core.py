@@ -224,6 +224,7 @@ class CLI:
     A simple CLI framework that comes with 3 default commands:
         help, exit, quit
     Use add_function() to add a function as a command in the CLI.
+    Alternatively, use the subroutine() decorator.
     If not explicitly specified, function name is used as the command name.
     Then, function parameters are automatically converted to command arguments
     by the following rules:
@@ -277,6 +278,34 @@ class CLI:
             else:
                 print('[WARNING] Since readline module cannot work on Windows, '
                       'tab completion has no effect!', file=sys.stderr)
+
+    
+    def subroutine(self, name=None):
+        """
+        Functionally equivalent to add_function() but it's a decorator.
+        Usage:
+
+            @cli.subroutine(name='run myfunc')
+            def myfunc():
+                pass
+
+        This is equivalent to:
+
+            cli.add_function(myfunc, name='run myfunc')
+
+        Parameters
+        ----------
+        name : str
+            If not given, function name is used as command name.
+            Separate by white space to automatically add intermediate
+            groups of command.
+        """
+
+        def decorator(func):
+            self.add_function(func, name=name)
+            return func
+
+        return decorator
 
     def add_function(self, func, name=None):
         """
