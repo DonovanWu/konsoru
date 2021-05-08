@@ -246,7 +246,8 @@ class CLI:
 
     def __init__(self, prompt='> ', startup_msg=None, goodbye_msg=None,
                  enable_shell=False, enable_traceback=False, enable_tab_completion=True,
-                 enable_eof_exit_confirmation=False, enable_non_tty_echo=True):
+                 enable_eof_exit_confirmation=False, enable_non_tty_echo=True,
+                 enable_print_return=True):
         self.prompt = prompt
         self._command_options = {}
         if startup_msg is None:
@@ -261,6 +262,7 @@ class CLI:
         self._enable_eof_exit_confirmation = enable_eof_exit_confirmation
         self._enable_non_tty_echo = enable_non_tty_echo
         self._enable_shell = enable_shell
+        self._enable_print_return = enable_print_return
 
         self._shell_commands = []
         self._system = config.system if config.system in config.settings['shell']['allowed_commands'] else \
@@ -269,11 +271,11 @@ class CLI:
             self._shell_commands = config.settings['shell']['allowed_commands'][self._system]
 
         if enable_tab_completion:
-            if config.system != 'windows':
-                readline.parse_and_bind("tab: complete")
-                readline.set_completer(self._completer)
-            elif sys.platform == 'darwin' and 'libedit' in readline.__doc__:
+            if sys.platform == 'darwin' and 'libedit' in readline.__doc__:
                 readline.parse_and_bind("bind ^I rl_complete")
+                readline.set_completer(self._completer)
+            elif config.system != 'windows':
+                readline.parse_and_bind("tab: complete")
                 readline.set_completer(self._completer)
             else:
                 print('[WARNING] Since readline module cannot work on Windows, '
@@ -428,7 +430,9 @@ class CLI:
         elif cmd in self._command_options:
             # execute a CLI command
             cmd = self._command_options[cmd]
-            cmd.run(argstr)
+            ret = cmd.run(argstr)
+            if self._enable_print_return and ret is not None:
+                print(str(ret))
         else:
             raise exceptions.NonCriticalCLIException('Unknown command: %s' % cmd)
 
