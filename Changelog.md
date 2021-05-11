@@ -1,6 +1,15 @@
 Changelog
 =========
 
+## v0.1.0
+
+New Features:
+1. Added subroutine decorator (same function as `add_function()`).
+2. Added a feature to print function return automatically, enabled by default.
+
+Bug Fixes:
+1. Fixed a tab completion bug on Mac. (The fix in the last version was ineffective.)
+
 ## v0.0.7
 
 Bug Fixes:
