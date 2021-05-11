@@ -47,6 +47,15 @@ def _print_block(list_of_str, min_cell_width=10, max_cell_width=20, block_width=
         print(' ' * indent + '%-{}s'.format(cell_width) * len(group) % tuple(group))
 
 
+def _flatten_dict(d, parent_key=None, sep=' '):
+    if isinstance(d, (dict, UserDict)):
+        for k, v in d.items():
+            compo_key = k if parent_key is None else sep.join([parent_key, k])
+            yield from _flatten_dict(v, parent_key=compo_key, sep=sep)
+    else:
+        yield parent_key, d
+
+
 # ------------------------------------------------
 # primary components
 # ------------------------------------------------
@@ -504,13 +513,13 @@ class CLI:
             subcommand is given.
         """
 
-        subcmd_helpstr = ', '.join(self._command_options.keys())
+        subcmd_choices = list(self._command_options.keys())
         if main is None:
             parser = argparse.ArgumentParser()
-            parser.add_argument('subcommand', help="Available options: %s" % subcmd_helpstr)
+            parser.add_argument('subcommand', choices=subcmd_choices)
         else:
             parser = argparse.ArgumentParser(add_help=False)
-            parser.add_argument('subcommand', nargs='?', default=None)
+            parser.add_argument('subcommand', nargs='?', default=None, choices=subcmd_choices)
         args, unknown = parser.parse_known_args()
 
         subcommand = args.subcommand
@@ -518,7 +527,16 @@ class CLI:
 
         if subcommand is None and main is not None:
             description = getattr(main, 'description', '')
-            description = description + '\nAvailable subcommands: ' + subcmd_helpstr
+            
+            main_name = None
+            func2name = {v._func: k for k, v in self._items()}
+            if main in func2name:
+                main_name = func2name[main]
+            elif hasattr(main, '__name__'):
+                main_name = main.__name__
+            
+            if main_name is not None:
+                description = description.strip() + ' On default runs: ' + main_name
             main.description = description.strip()
             maincmd = _Command(main, name=sys.argv[0])
             maincmd.run(cmd_args)
@@ -565,6 +583,22 @@ class CLI:
             return candidates[state]
         else:
             return None
+
+    # iterator of "command name -> command object" mapping in a flattened fashion
+    def _items(self):
+        for name, cmd in self._command_options.items():
+            if isinstance(cmd, _Command):
+                yield name, cmd
+            elif isinstance(cmd, _CompositeCommand):
+                yield from _flatten_dict(cmd, parent_key=name, sep=' ')
+
+    def _keys(self):
+        for k, v in self._items():
+            yield k
+
+    def _values(self):
+        for k, v in self._items():
+            yield v
 
     @staticmethod
     def quit(rc=None):
