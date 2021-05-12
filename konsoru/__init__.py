@@ -6,4 +6,4 @@ from .core import CLI
 
 name = "konsoru"
 __doc__ = "A functional programming styled CLI console application framework based on argparse."
-__version__ = "0.1.1+build0007"
+__version__ = "0.1.1+build0012"

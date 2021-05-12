@@ -518,8 +518,16 @@ class CLI:
             parser = argparse.ArgumentParser()
             parser.add_argument('subcommand', choices=subcmd_choices)
         else:
-            parser = argparse.ArgumentParser(add_help=False)
-            parser.add_argument('subcommand', nargs='?', default=None, choices=subcmd_choices)
+            subcmd_helpmsg = None
+            func2name = {v._func: k for k, v in self._items()}
+            if main in func2name:
+                subcmd_helpmsg = 'By default runs command: %s' % func2name[main]
+            elif hasattr(main, '__name__'):
+                subcmd_helpmsg = 'By default runs function: %s' % main.__name__
+            
+            parser = argparse.ArgumentParser()
+            parser.add_argument('subcommand', nargs='?', default=None, choices=subcmd_choices,
+                                help=subcmd_helpmsg)
         args, unknown = parser.parse_known_args()
 
         subcommand = args.subcommand
@@ -527,19 +535,12 @@ class CLI:
 
         if subcommand is None and main is not None:
             description = getattr(main, 'description', '')
-            
-            main_name = None
-            func2name = {v._func: k for k, v in self._items()}
-            if main in func2name:
-                main_name = func2name[main]
-            elif hasattr(main, '__name__'):
-                main_name = main.__name__
-            
-            if main_name is not None:
-                description = description.strip() + ' On default runs: ' + main_name
+            description = description + '\nAvailable subcommands: ' + ', '.join(subcmd_choices)
             main.description = description.strip()
             maincmd = _Command(main, name=sys.argv[0])
-            maincmd.run(cmd_args)
+            ret = maincmd.run(cmd_args)
+            if self._enable_print_return and ret is not None:
+                print(str(ret))
         else:
             self.execute('%s %s' % (subcommand, cmd_args))
 
@@ -585,15 +586,15 @@ class CLI:
             return None
 
     # iterator of "command name -> command object" mapping in a flattened fashion
-    def _items(self):
+    def _items(self, sep=' '):
         for name, cmd in self._command_options.items():
             if isinstance(cmd, _Command):
                 yield name, cmd
             elif isinstance(cmd, _CompositeCommand):
-                yield from _flatten_dict(cmd, parent_key=name, sep=' ')
+                yield from _flatten_dict(cmd, parent_key=name, sep=sep)
 
-    def _keys(self):
-        for k, v in self._items():
+    def _keys(self, sep=' '):
+        for k, v in self._items(sep=sep):
             yield k
 
     def _values(self):
