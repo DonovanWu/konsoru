@@ -1,6 +1,14 @@
 Changelog
 =========
 
+## v0.1.1
+
+Improvements:
+1. When using `cli.run()`, help message now lists all available subcommand options.
+
+Bug Fixes:
+1. Fixed a problem where main program's argument will be wrongfully expelled and raise an error when using `cli.run()`.
+
 ## v0.1.0
 
 New Features:

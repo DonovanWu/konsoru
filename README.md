@@ -72,6 +72,8 @@ $ python3 helloworld.py helloworld
 Hello world!
 ```
 
+Note that default commands under the console mode, i.e. `help`, `exit`, `quit`, will not be added when using `cli.run()`.
+
 Put the script in a directory in your `$PATH` and give it executable permissions to call it anywhere in your filesystem without `python3` in the front.
 
 For more sophisticated examples, check the `examples/` directory in the github repository.
