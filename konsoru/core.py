@@ -517,6 +517,7 @@ class CLI:
         if main is None:
             parser = argparse.ArgumentParser()
             parser.add_argument('subcommand', choices=subcmd_choices)
+            args, unknown = parser.parse_known_args()
         else:
             subcmd_helpmsg = None
             func2name = {v._func: k for k, v in self._items()}
@@ -526,9 +527,14 @@ class CLI:
                 subcmd_helpmsg = 'By default runs function: %s' % main.__name__
             
             parser = argparse.ArgumentParser()
-            parser.add_argument('subcommand', nargs='?', default=None, choices=subcmd_choices,
-                                help=subcmd_helpmsg)
-        args, unknown = parser.parse_known_args()
+            # abuse metavar to pretend there are choices in help message
+            parser.add_argument('subcommand', nargs='?', default=None, help=subcmd_helpmsg,
+                                metavar='{%s}' % ','.join(subcmd_choices))
+            args, unknown = parser.parse_known_args()
+            # fall back to main program arguments when subcommand is not one of the choices
+            if args.subcommand is not None and args.subcommand not in subcmd_choices:
+                unknown = [args.subcommand] + unknown
+                args.subcommand = None
 
         subcommand = args.subcommand
         cmd_args = ' '.join(unknown)

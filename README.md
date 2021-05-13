@@ -13,7 +13,7 @@ $ pip install konsoru
 
 ## Usage
 
-Konsoru enables you to build CLI applications quickly: either a text-based console or a program that executes in terminal.
+Konsoru enables you to build CLI applications quickly: either a text-based console or a program with multiple subcommands that executes in terminal.
 
 Below is a bare minimum `helloworld.py` program that launches a text-based console:
 
@@ -51,7 +51,7 @@ Hello world!
 > quit
 ```
 
-Alternatively, you can add your function as a command using the `subroutine()` decorator. Also, by default, the framework will print the return of added functions, unless the return is `None`. So the program below is completely equivalent to the example above:
+Alternatively, you can add your function as a command using the `subroutine()` decorator. The decorator should be stacked on top of other decorators, if any. Also, by default, the framework will print the return of added functions, unless the return is `None`. So the program below is completely equivalent to the example above:
 
 ```python
 from konsoru import CLI
@@ -65,11 +65,13 @@ def helloworld():
 cli.loop()
 ```
 
-To convert this into a program with subcommands that executes in the terminal, you just need to change `cli.loop()` into `cli.run()` at the end. Then, the program will behave like this:
+To convert this into a program with subcommands that is interacted with through terminal, simply change `cli.loop()` into `cli.run()` at the end. Then, the program will behave like this:
 
 ```
 $ python3 helloworld.py helloworld
 Hello world!
 ```
+
+Put the script in a directory in your `$PATH` and give it executable permissions to call it anywhere in your filesystem without `python3` in the front.
 
 For more sophisticated examples, check the `examples/` directory in the github repository.
