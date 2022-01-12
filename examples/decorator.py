@@ -113,7 +113,7 @@ def _parse(s):
     raise ValueError('"%s" does not follow variable name rule!' % s)
 
 
-@cli.subroutine()
+@cli.subroutine
 @_store_answer
 def add(a, b):
     a = _parse(a)
@@ -121,7 +121,7 @@ def add(a, b):
     return a + b
 
 
-@cli.subroutine()
+@cli.subroutine
 @_store_answer
 def sub(a, b):
     a = _parse(a)
@@ -129,6 +129,7 @@ def sub(a, b):
     return a - b
 
 
+# parentheses are optional if no argument is provided
 @cli.subroutine()
 @_store_answer
 def mul(a, b):
@@ -148,7 +149,7 @@ def div(a, b, floor_div=False):
         return a / b
 
 
-# let's not overwrite the builtin sum()...
+# let's not overwrite the builtin sum(), but still call it "sum" in console
 @cli.subroutine(name='sum')
 @_store_answer
 def sum_func(*vals):
@@ -172,7 +173,7 @@ def show_env():
         print(name, '=', value)
 
 
-@cli.subroutine()
+@cli.subroutine
 @description('Show the answer of the previous operation.')
 def ans():
     return env['ans']

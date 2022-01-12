@@ -293,7 +293,7 @@ class CLI:
                 print('[WARNING] Since readline module cannot work on Windows, '
                       'tab completion has no effect!', file=sys.stderr)
     
-    def subroutine(self, name=None):
+    def subroutine(self, using=None, name=None):
         """
         Functionally equivalent to add_function() but it's a decorator.
         Usage:
@@ -308,6 +308,9 @@ class CLI:
 
         Parameters
         ----------
+        using :
+            Placed here so that this decorator can be used without
+            parentheses.
         name : str
             If not given, function name is used as command name.
             Separate by white space to automatically add intermediate
@@ -318,7 +321,10 @@ class CLI:
             self.add_function(func, name=name)
             return func
 
-        return decorator
+        if callable(using):
+            return decorator(using)
+        else:
+            return decorator
 
     def add_function(self, func, name=None):
         """
@@ -326,7 +332,7 @@ class CLI:
 
         Parameters
         ----------
-        func : function
+        func : callable
             Function to be added as command. Parameters automatically
             converted to command arguments.
         name : str
