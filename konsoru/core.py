@@ -104,11 +104,14 @@ class _Command:
                 dest = '-%s' % name if len(name) == 1 else '--%s' % name
                 # parameters with default values in the function
                 if param.default is True:
-                    self.parser.add_argument(dest, action='store_false')
+                    kwargs = _extract_kwargs(func, name, exclude_list=['action'])
+                    self.parser.add_argument(dest, action='store_false', **kwargs)
                 elif param.default is False:
-                    self.parser.add_argument(dest, action='store_true')
+                    kwargs = _extract_kwargs(func, name, exclude_list=['action'])
+                    self.parser.add_argument(dest, action='store_true', **kwargs)
                 elif param.default is None:
-                    self.parser.add_argument(name, nargs='?')
+                    kwargs = _extract_kwargs(func, name, exclude_list=['nargs'])
+                    self.parser.add_argument(name, nargs='?', **kwargs)
                     self._positional_args.append(name)
                 elif isinstance(param.default, (tuple, list)):
                     kwargs = _extract_kwargs(func, name, exclude_list=['action'])
