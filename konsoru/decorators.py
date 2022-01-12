@@ -1,6 +1,3 @@
-import functools
-
-
 def description(string):
     """
     Function decorator used when you want to show a description about your
@@ -14,12 +11,10 @@ def description(string):
     string : str
         Description string for your command.
     """
-    def description_decorator(func):
-        def description_wrapper(*a, **kw):
-            return func(*a, **kw)
+    def decorator(func):
         func.description = string
-        return functools.wraps(func)(description_wrapper)
-    return description_decorator
+        return func
+    return decorator
 
 
 def parameter(name, **kwargs):
@@ -34,15 +29,13 @@ def parameter(name, **kwargs):
     kwargs :
         Keyword arguments to pass to ArgumentParser's add_argument() method.
     """
-    def parameter_decorator(func):
-        def parameter_wrapper(*a, **kw):
-            return func(*a, **kw)
+    def decorator(func):
         if hasattr(func, 'parameter'):
             func.parameter[name] = kwargs
         else:
             func.parameter = {name: kwargs}
-        return functools.wraps(func)(parameter_wrapper)
-    return parameter_decorator
+        return func
+    return decorator
 
 
 def ignore(name, *names):
@@ -58,13 +51,11 @@ def ignore(name, *names):
     names :
         Specify more parameters to ignore.
     """
-    def ignore_decorator(func):
-        def ignore_wrapper(*a, **kw):
-            return func(*a, **kw)
+    def decorator(func):
         all_names = set((name, ) + names)
         if hasattr(func, 'ignore'):
             func.ignore = func.ignore.union(all_names)
         else:
             func.ignore = all_names
-        return functools.wraps(func)(ignore_wrapper)
-    return ignore_decorator
+        return func
+    return decorator

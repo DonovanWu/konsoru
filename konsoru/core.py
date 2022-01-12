@@ -292,7 +292,6 @@ class CLI:
             else:
                 print('[WARNING] Since readline module cannot work on Windows, '
                       'tab completion has no effect!', file=sys.stderr)
-
     
     def subroutine(self, name=None):
         """
