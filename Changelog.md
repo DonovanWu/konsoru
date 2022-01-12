@@ -1,6 +1,14 @@
 Changelog
 =========
 
+## v0.1.2
+
+New Features:
+1. Parentheses for `subroutine` decorator are now optional
+
+Bug Fixes:
+1. Fixed a bug where `parameter` decorator won't work on positional arguments or arguments of boolean value.
+
 ## v0.1.1
 
 Improvements:
